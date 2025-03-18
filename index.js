@@ -1,20 +1,23 @@
 
-
 const blessed = require('blessed');
 
 // Screen Object
 const screen = blessed.screen({
-    smartCSR: true
+    smartCSR: true,
+    cursor: {
+        blink: true
+    }
 });
 
-screen.title = 'TUI Example';
+screen.title = 'Codex';
+
 
 // Box Object
 const box = blessed.box({
     top: 'center',
     left: 'center',
-    width: '50%',
-    height: '50%',
+    width: '75%',
+    height: '75%',
     content: 'Hello {bold}world{/bold}!',
     tags: true,
     border: {
@@ -22,7 +25,7 @@ const box = blessed.box({
     },
     style: {
         fg: 'white',
-        bg: 'magenta',
+        bg: 'blue',
         border: {
             fg: '#f0f0f0'
         },
