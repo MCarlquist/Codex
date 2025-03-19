@@ -1,5 +1,6 @@
-
-const blessed = require('blessed');
+import blessed from 'blessed';
+import readline from 'readline';
+import { getBooks, saveBooks } from './api/index.js';
 
 // Screen Object
 const screen = blessed.screen({
@@ -18,47 +19,53 @@ const box = blessed.box({
     left: 'center',
     width: '75%',
     height: '75%',
-    content: 'Hello {bold}world{/bold}!',
+    content: '',
     tags: true,
-    border: {
-        type: 'line'
-    },
     style: {
-        fg: 'white',
-        bg: 'blue',
-        border: {
-            fg: '#f0f0f0'
-        },
-        hover: {
-            bg: 'green'
-        }
+        
     }
 });
 
-// Append our box to the screen.
+
+
+const r1 = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+
+async function run () {
+    const books = await getBooks();
+    console.log('Books fetched from API');
+    
+    const bookShelf = Object.keys(books).map((key, index) => {
+        return `${index + 1}. the Key ${key}:: ${books[key].title}`;
+    });
+
+   box.setContent(bookShelf.join('\n'));
+   screen.render();
+    
+    r1.question('Save books to DB? (y/n): ', async (answer) => {
+        if(answer.toLowerCase() === 'yy') {
+            await saveBooks(bookShelf);
+            console.log('Books saved to DB');
+        } else {
+            console.log('Books not saved to DB');
+        }
+        r1.close();
+    });
+}
+
+
+run();
+
 screen.append(box);
-
-// On box click, change content.
-box.on('click', (data) => {
-    box.setContent('{center}Some different {red-fg}content{/red-fg}.{/center}');
-    screen.render();
-});
-
-// If box is focused, handle `enter`/`return` and give us some more content.
-box.key('enter', function (ch, key) {
-    box.setContent('{right}Even different {black-fg}content{/black-fg}.{/right}\n');
-    box.setLine(1, 'bar');
-    box.insertLine(1, 'foo');
-    screen.render();
-});
-
 // Quit on Escape, q, or Control-C.
 screen.key(['escape', 'q', 'C-c'], (ch, key) => {
     return process.exit(0);
 });
 
-// Focus our element.
-box.focus();
+
 
 // Render the screen.
 screen.render();
