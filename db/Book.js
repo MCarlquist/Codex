@@ -1,19 +1,18 @@
-import mongoose from 'mongoose';
+import { z } from 'zod';
 
-// Book Schema
-const bookSchema = new mongoose.Schema({
-    title: String,
-    author: {
-        name: String,
-        birth_year: Number,
-        death_year: Number
-    },
-    summary: [String],
-    subjects: [String],
-    epub: String,
-    download_count: Number,
-    id: Number,
+// Book Schema using Zod
+const bookSchema = z.object({
+    title: z.string(),
+    author: z.object({
+        name: z.string(),
+        birth_year: z.number(),
+        death_year: z.number().nullable(), // Allow null for death_year
+    }),
+    summary: z.array(z.string()),
+    subjects: z.array(z.string()),
+    epub: z.string(),
+    download_count: z.number(),
+    id: z.number(),
 });
 
-const Book = mongoose.model('Book', bookSchema);
-export default Book;
+export default bookSchema;

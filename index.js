@@ -1,71 +1,60 @@
-import blessed from 'blessed';
-import readline from 'readline';
-import { getBooks, saveBooks } from './api/index.js';
+import pkg from 'terminal-kit';
+const { terminal } = pkg;
+import { getBooks } from './api/index.js';
+import figlet from 'figlet';
 
-// Screen Object
-const screen = blessed.screen({
-    smartCSR: true,
-    cursor: {
-        blink: true
+const app = terminal;
+app.clear();
+
+figlet("Codex", function (err, data) {
+    if (err) {
+      console.log("Something went wrong...");
+      console.dir(err);
+      return;
+    }
+    console.log(data);
+  });
+
+
+// Handle Ctrl+C or Escape to gracefully exit
+app.on('key', (name) => {
+    if (name === 'CTRL_C' || name === 'ESCAPE') {
+        app.clear();
+        app.green("\nExiting...\n");
+        app.grabInput(false);
+        app.hideCursor();
+        process.exit(1);
     }
 });
 
-screen.title = 'Codex';
-
-
-// Box Object
-const box = blessed.box({
-    top: 'center',
-    left: 'center',
-    width: '75%',
-    height: '75%',
-    content: '',
-    tags: true,
-    style: {
-        
-    }
-});
-
-
-
-const r1 = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-
-async function run () {
+// fetch books from API
+const fetchBooks = async () => {
+    app.blue("Fetching books...\n");
     const books = await getBooks();
-    console.log('Books fetched from API');
-    
-    const bookShelf = Object.keys(books).map((key, index) => {
-        return `${index + 1}. the Key ${key}:: ${books[key].title}`;
-    });
+    return books;
+};
 
-   box.setContent(bookShelf.join('\n'));
-   screen.render();
-    
-    r1.question('Save books to DB? (y/n): ', async (answer) => {
-        if(answer.toLowerCase() === 'yy') {
-            await saveBooks(bookShelf);
-            console.log('Books saved to DB');
+// Display books in a single-column menu format
+const displayBooks = (books) => {  
+    const formattedBooks = books.map((title, index) => `${index + 1}. ${title.title} by ${title.authors.map(author => author.name).join(', ')} (Downloads: ${title.download_count})`);
+    app.singleColumnMenu(formattedBooks, {
+        cancelable: true,
+        style: app.green,
+        selectedStyle: app.bold.cyan,
+    }, (error, response) => {
+        if (response.canceled) {
+            app.red("\nSelection canceled.\n");
         } else {
-            console.log('Books not saved to DB');
+            app.green(`\nYou selected: ${formattedBooks[response.selectedIndex]}\n`);
         }
-        r1.close();
     });
-}
+};
 
+// Main function to run the app
+const main = async () => {
+    app.hideCursor();
+    const books = await fetchBooks();
+    displayBooks(books);
+};
 
-run();
-
-screen.append(box);
-// Quit on Escape, q, or Control-C.
-screen.key(['escape', 'q', 'C-c'], (ch, key) => {
-    return process.exit(0);
-});
-
-
-
-// Render the screen.
-screen.render();
+main();
