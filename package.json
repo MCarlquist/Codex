@@ -1,0 +1,34 @@
+{
+  "name": "codex",
+  "version": "1.0.0",
+  "description": "A Bookshelf for the Nerds in us",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MCarlquist/Codex.git"
+  },
+  "keywords": [
+    "TUI",
+    "Books"
+  ],
+  "author": "Max Carlquist",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MCarlquist/Codex/issues"
+  },
+  "homepage": "https://github.com/MCarlquist/Codex#readme",
+  "dependencies": {
+    "axios": "^1.8.3",
+    "blessed": "^0.1.81",
+    "mongoose": "^8.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
